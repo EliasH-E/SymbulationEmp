@@ -8,6 +8,8 @@ class HealthHost : public SGPHost {
     public:
 
     int cycles_given = 0;
+    int honoray_cycles = 0;
+    int starting_updates = 25;
 
       /**
    * Constructs a new SGPHost as an ancestor organism, with either a random
@@ -45,7 +47,17 @@ class HealthHost : public SGPHost {
         random, GetWorld(), sgp_config, GetCPU().GetProgram(), GetIntVal());
     return host_baby;
   }
-  
+    void CycleTransfer(int amount) override {
+      cycles_given += amount;
+    }
+
+    int GetCyclesGiven(){
+      return cycles_given;
+    }
+
+    std::string const GetName() override{
+      return "HealthHost";
+    }
     /** 
      * Input: The location of the host.
      * 
@@ -66,18 +78,21 @@ class HealthHost : public SGPHost {
         if (HasSym()) {
           
           if(sgp_config->DONATION_STEAL_INST()){
-            sym_cycle = 1;
+            sym_cycle = 0;
 
-            if(cycles_given >= int(sgp_config->CYCLES_PER_UPDATE())){
-              host_cycle += 1;
-              sym_cycle -= 1;
-              cycles_given -= int(sgp_config->CYCLES_PER_UPDATE());
+            if(cycles_given >= 1){
+              if(random->P(sgp_config->CPU_TRANSFER_CHANCE())){
+                host_cycle += 1;
+                sym_cycle -= 1;
+              }
+              cycles_given = 0;
               
-            }
-            else if(cycles_given <= (-1 * int(sgp_config->CYCLES_PER_UPDATE()))){
-              host_cycle -= 1;
-              sym_cycle += 1;
-              cycles_given += int(sgp_config->CYCLES_PER_UPDATE());
+            }else if(cycles_given <= -1){
+              if(random->P(sgp_config->CPU_TRANSFER_CHANCE())){
+                host_cycle -= 1;
+                sym_cycle += 1;
+              }
+              cycles_given = 0;
 
             }
           }
@@ -102,6 +117,20 @@ class HealthHost : public SGPHost {
               sym_cycle = 0;
             }
           }
+          }
+        }
+
+        if(sym_cycle == 0){
+          if(starting_updates > 0){
+            sym_cycle += 1;
+            starting_updates -= 1;
+          }
+          else{
+            honoray_cycles += 1;
+            if(honoray_cycles == 10){
+              starting_updates += 1;
+              honoray_cycles = 0;
+            }
           }
         }
         
@@ -137,13 +166,6 @@ class HealthHost : public SGPHost {
       GrowOlder();
     }
 
-    void CycleTransfer(int amount) override {
-      cycles_given += amount; 
-    }
-
-    int GetCyclesGiven(){
-      return cycles_given;
-    }
 };
 
   

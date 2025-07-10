@@ -257,14 +257,17 @@ public:
     Add("SharedIO");
   }
 
-  void AddSteal(){
+  void AddStartSteal(int steal_count){
     
+    for (int i = 0; i < steal_count; i++){
+      Add("Steal");
+      
+      Add("Donate");
+      Add("Donate");
+      Add("Donate");
+    
+    }
     Add("Steal");
-    //std::cout << "Adding Steal" << std::endl;
-  }
-
-  void AddDonate(){
-    Add("Donate");
   }
 };
 
@@ -279,11 +282,27 @@ sgpl::Program<Spec> CreateNotProgram(size_t length) {
   return program.Build(length);
 }
 
-sgpl::Program<Spec> CreateMutualistStart(size_t length) {
+sgpl::Program<Spec> CreateParasiteNotProgram(size_t length, int steal_count) {
   ProgramBuilder program;
-  program.AddNand();
-  return program.BuildNoRepro(length);
+  program.AddStartSteal(steal_count);
+  program.AddNot();
+  
+  return program.Build(length);
 }
+
+sgpl::Program<Spec> CreateMutualistNotProgram(size_t length) {
+  ProgramBuilder program;
+  program.AddNot();
+  program.Add("Donate");;
+  return program.Build(length);
+}
+
+sgpl::Program<Spec> CreateEquProgram(size_t length) {
+  ProgramBuilder program;
+  program.AddEqu();
+  return program.Build(length);
+}
+
 
 /**
  * Picks what type of starting program should be created based on the config and
@@ -291,7 +310,17 @@ sgpl::Program<Spec> CreateMutualistStart(size_t length) {
  */
 sgpl::Program<Spec> CreateStartProgram(emp::Ptr<SymConfigSGP> config) {
   if (config->TASK_TYPE() == 1) {
-    return CreateNotProgram(PROGRAM_LENGTH);
+    if(config->DONATION_STEAL_INST() == 1){
+      if(config->STRESS_TYPE() == 1){
+        return CreateParasiteNotProgram(PROGRAM_LENGTH, config->CPU_TRANSFER_AMOUNT());
+      }
+      else if(config->STRESS_TYPE() == 0){
+        return CreateMutualistNotProgram(PROGRAM_LENGTH);
+      }
+    }
+    else{
+      return CreateNotProgram(PROGRAM_LENGTH);
+    }
   } else {
     return CreateReproProgram(PROGRAM_LENGTH);
   }
