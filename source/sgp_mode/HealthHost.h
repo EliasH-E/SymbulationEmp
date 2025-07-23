@@ -82,7 +82,7 @@ class HealthHost : public SGPHost {
         int host_cycle = 1;
         int sym_cycle = 0;
         if (HasSym()) {
-          
+          sym_cycle = 1;
           if(sgp_config->DONATION_STEAL_INST()){
             
             
@@ -112,31 +112,31 @@ class HealthHost : public SGPHost {
           //one of its bonus updates is left, if so it uses one, if not it ticks up the counter
           //for when it receives said bonus update. 
           //Allows for symbiont to reach steals but to still need them
-            emp::vector<emp::Ptr<Organism>> &syms = GetSymbionts();
-              emp::Ptr<Organism> curSym = syms[0];
-              if(last_sym != curSym){
-                last_sym = curSym;
-                cycles_given = 0;
-                starting_updates = sgp_config->STARTING_BONUS();
-              }
+            // emp::vector<emp::Ptr<Organism>> &syms = GetSymbionts();
+            //   emp::Ptr<Organism> curSym = syms[0];
+            //   if(last_sym != curSym){
+            //     last_sym = curSym;
+            //     cycles_given = 0;
+            //     starting_updates = sgp_config->STARTING_BONUS();
+            //   }
 
-            if(sym_cycle == 0 && sgp_config->DONATION_STEAL_INST()){
+            // if(sym_cycle == 0 && sgp_config->DONATION_STEAL_INST()){
               
               
               
-              if(starting_updates > 0){
-                sym_cycle += 1;
-                starting_updates -= 1;
-              }
+            //   if(starting_updates > 0){
+            //     sym_cycle += 1;
+            //     starting_updates -= 1;
+            //   }
               
-            }
-            if(starting_updates < 1){
-              honoray_cycles += 1;
-                if(honoray_cycles == sgp_config->BONUS_UPDATE_WAIT()){
-                  starting_updates += 1;
-                  honoray_cycles = 0;
-                }
-            }
+            // }
+            // if(starting_updates < 1){
+            //   honoray_cycles += 1;
+            //     if(honoray_cycles == sgp_config->BONUS_UPDATE_WAIT()){
+            //       starting_updates += 1;
+            //       honoray_cycles = 0;
+            //     }
+            // }
           }
           else{
             if (sgp_config->STRESS_TYPE() == MUTUALIST) {
