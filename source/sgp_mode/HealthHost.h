@@ -89,14 +89,14 @@ class HealthHost : public SGPHost {
             if(cycles_given >= 1){
               if(random->P(sgp_config->CPU_TRANSFER_CHANCE())){
                 host_cycle += 1;
-                sym_cycle -= 1;
+              
                 cycles_given = 0;
               }
               
               
               //cycles_given = 0;
             }
-            if(cycles_given <= -1){
+            else if(cycles_given <= -1){
               
              
               if(random->P(sgp_config->CPU_TRANSFER_CHANCE())){
