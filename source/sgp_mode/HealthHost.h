@@ -104,6 +104,10 @@ class HealthHost : public SGPHost {
         
         int host_cycle = 1;
         int sym_cycle = 0;
+        if(random->P(sgp_config->CPU_TRANSFER_CHANCE())){
+            host_cycle += 1;
+
+        }
         if (HasSym()) {
           
           if(sgp_config->DONATION_STEAL_INST()){
