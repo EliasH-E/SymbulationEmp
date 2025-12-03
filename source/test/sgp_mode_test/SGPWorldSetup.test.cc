@@ -4,8 +4,8 @@ TEST_CASE("SetupTaskProfileFun", "[sgp]") {
 	emp::Random random(61);
 	SymConfigSGP config;
 
-	WHEN("TRACK_PARENT_TASKS is 2 (on, returns parent OR self tasks)") {
-		config.TRACK_PARENT_TASKS(2);
+	WHEN("TRACK_PARENT_TASKS is CURRENTORPARENT (on, returns parent OR self tasks)") {
+		config.TRACK_PARENT_TASKS(CURRENTORPARENT);
 		SGPWorld world(random, &config, LogicTasks);
 
 		emp::Ptr<SGPHost> host_parent = emp::NewPtr<SGPHost>(&random, &world, &config);
@@ -37,8 +37,8 @@ TEST_CASE("SetupTaskProfileFun", "[sgp]") {
 		symbiont_parent.Delete();
 	}
 
-	WHEN("TRACK_PARENT_TASKS is 1 (on, returns parent tasks only)") {
-		config.TRACK_PARENT_TASKS(1);
+	WHEN("TRACK_PARENT_TASKS is PARENTONLY (on, returns parent tasks only)") {
+		config.TRACK_PARENT_TASKS(PARENTONLY);
 		SGPWorld world(random, &config, LogicTasks);
 
 		emp::Ptr<SGPHost> host = emp::NewPtr<SGPHost>(&random, &world, &config);
@@ -61,8 +61,8 @@ TEST_CASE("SetupTaskProfileFun", "[sgp]") {
 		symbiont.Delete();
 	}
 
-	WHEN("TRACK_PARENT_TASKS is 0 (off, returns self tasks only)") {
-		config.TRACK_PARENT_TASKS(0);
+	WHEN("TRACK_PARENT_TASKS is CURRENTONLY (off, returns self tasks only)") {
+		config.TRACK_PARENT_TASKS(CURRENTONLY);
 		SGPWorld world(random, &config, LogicTasks);
 
 		emp::Ptr<SGPHost> host = emp::NewPtr<SGPHost>(&random, &world, &config);

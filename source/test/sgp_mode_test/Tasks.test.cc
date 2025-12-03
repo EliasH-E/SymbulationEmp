@@ -10,7 +10,7 @@ TEST_CASE("Only first task credit for hosts vs. symbionts","[sgp]"){
   config.SEED(1);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.002);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
 
   SGPWorld world(random, &config, LogicTasks);
@@ -141,7 +141,7 @@ TEST_CASE("Task integration scoring and marking", "[sgp]") {
   config.SEED(1);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.002);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
   SGPWorld world(random, &config, LogicTasks);
   
@@ -235,7 +235,7 @@ TEST_CASE("IsOnlyTask functionality", "[sgp]") {
   config.SEED(1);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.002);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
   config.HOST_ONLY_FIRST_TASK_CREDIT(1);
   config.SYM_ONLY_FIRST_TASK_CREDIT(1);
@@ -321,7 +321,7 @@ TEST_CASE("ProcessOutput Functionality with LogicTasks", "[sgp]"){
   config.SEED(1);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.002);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
   config.HOST_ONLY_FIRST_TASK_CREDIT(0);
   config.SYM_ONLY_FIRST_TASK_CREDIT(0);
@@ -622,7 +622,7 @@ TEST_CASE("WhichTaskDone Functionality", "[sgp]"){
   config.SEED(1);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.002);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
   config.HOST_ONLY_FIRST_TASK_CREDIT(0);
   config.SYM_ONLY_FIRST_TASK_CREDIT(0);
@@ -730,7 +730,7 @@ TEST_CASE("Task completion edge cases", "[sgp]") { // IsSolved Edge casses docum
   config.SEED(1);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.002);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
   config.HOST_ONLY_FIRST_TASK_CREDIT(0);
   config.SYM_ONLY_FIRST_TASK_CREDIT(0);
@@ -765,7 +765,7 @@ TEST_CASE("ProcessOutput Functionality with LogicTasksDiff", "[sgp]"){
   config.SEED(1);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.002);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
   config.HOST_ONLY_FIRST_TASK_CREDIT(0);
   config.SYM_ONLY_FIRST_TASK_CREDIT(0);
