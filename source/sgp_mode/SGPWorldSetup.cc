@@ -64,7 +64,7 @@ void SGPWorld::SetupSymbionts(unsigned long *total_syms) {
   * Purpose: Setup the task profile retriever function.
   */
 void SGPWorld::SetupTaskProfileFun() {
-  if (sgp_config->TRACK_PARENT_TASKS() == 2) {
+  if (sgp_config->TRACK_PARENT_TASKS() == CURRENTORPARENT) {
     fun_get_task_profile = [](const emp::Ptr<Organism> org) ->  const emp::BitSet<CPU_BITSET_LENGTH>&{
       if (org->IsHost()) {
         return (*org.DynamicCast<SGPHost>()->GetCPU().state.parent_or_current_tasks_performed).OR_SELF(*org.DynamicCast<SGPHost>()->GetCPU().state.tasks_performed);
@@ -74,7 +74,7 @@ void SGPWorld::SetupTaskProfileFun() {
       }
     };
   }
-  else if (sgp_config->TRACK_PARENT_TASKS() == 1) {
+  else if (sgp_config->TRACK_PARENT_TASKS() == PARENTONLY) {
     fun_get_task_profile = [](const emp::Ptr<Organism> org) ->  const emp::BitSet<CPU_BITSET_LENGTH>&{
       if (org->IsHost()) {
         return *org.DynamicCast<SGPHost>()->GetCPU().state.parent_tasks_performed;
@@ -84,7 +84,7 @@ void SGPWorld::SetupTaskProfileFun() {
       }
       };
   }
-  else if (sgp_config->TRACK_PARENT_TASKS() == 0) {
+  else if (sgp_config->TRACK_PARENT_TASKS() == CURRENTLONLY) {
     fun_get_task_profile = [](const emp::Ptr<Organism> org) ->  const emp::BitSet<CPU_BITSET_LENGTH>&{
       if (org->IsHost()) {
         return *org.DynamicCast<SGPHost>()->GetCPU().state.tasks_performed;
@@ -249,13 +249,13 @@ emp::WorldPosition SGPWorld::SymDoBirth(emp::Ptr<Organism> sym_baby, emp::WorldP
     for(emp::Ptr<Organism> sym : host->GetSymbionts()){
       const emp::BitSet<CPU_BITSET_LENGTH>& target_sym_tasks = fun_get_task_profile(sym);
 
-      if(sgp_config->PREFERENTIAL_OUSTING() == 1){
+      if(sgp_config->PREFERENTIAL_OUSTING() == EQUALORBETTER){
         // if has worse task match with any hosted sym, fail
         if(host_tasks.AND(incoming_sym_tasks).CountOnes() < host_tasks.AND(target_sym_tasks).CountOnes()){
           return false;
         }
       }
-      else if(sgp_config->PREFERENTIAL_OUSTING() == 2){
+      else if(sgp_config->PREFERENTIAL_OUSTING() == STRICTLYBETTER){
         // if has equal or worse task match with any hosted sym, fail
         if(host_tasks.AND(incoming_sym_tasks).CountOnes() <= host_tasks.AND(target_sym_tasks).CountOnes()){
           return false;
@@ -276,7 +276,7 @@ emp::WorldPosition SGPWorld::SymDoBirth(emp::Ptr<Organism> sym_baby, emp::WorldP
   emp::WorldPosition SGPWorld::PlaceSymbiontInHost(emp::Ptr<Organism> symbiont, const emp::BitSet<CPU_BITSET_LENGTH>& symbiont_infection_tasks, size_t source_pos) {
     int new_host_pos = GetNeighborHost(source_pos, symbiont_infection_tasks);
     if (new_host_pos > -1) { //-1 means no living neighbors
-      if (sgp_config->OUSTING() && sgp_config->PREFERENTIAL_OUSTING() && (int)pop[new_host_pos]->GetSymbionts().size() == sgp_config->SYM_LIMIT()) {
+      if (sgp_config->OUSTING() && sgp_config->PREFERENTIAL_OUSTING() != OFF && (int)pop[new_host_pos]->GetSymbionts().size() == sgp_config->SYM_LIMIT()) {
         if (!PreferentialOustingAllowed(symbiont_infection_tasks, pop[new_host_pos])) {
           symbiont.Delete();
           return emp::WorldPosition();

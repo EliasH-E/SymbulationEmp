@@ -5,7 +5,7 @@ TEST_CASE("SetupTaskProfileFun", "[sgp]") {
 	SymConfigSGP config;
 
 	WHEN("TRACK_PARENT_TASKS is 2 (on, returns parent OR self tasks)") {
-		config.TRACK_PARENT_TASKS(2);
+		config.TRACK_PARENT_TASKS(CURRENTORPARENT);
 		SGPWorld world(random, &config, LogicTasks);
 
 		emp::Ptr<SGPHost> host_parent = emp::NewPtr<SGPHost>(&random, &world, &config);
@@ -38,7 +38,7 @@ TEST_CASE("SetupTaskProfileFun", "[sgp]") {
 	}
 
 	WHEN("TRACK_PARENT_TASKS is 1 (on, returns parent tasks only)") {
-		config.TRACK_PARENT_TASKS(1);
+		config.TRACK_PARENT_TASKS(PARENTONLY);
 		SGPWorld world(random, &config, LogicTasks);
 
 		emp::Ptr<SGPHost> host = emp::NewPtr<SGPHost>(&random, &world, &config);
@@ -62,7 +62,7 @@ TEST_CASE("SetupTaskProfileFun", "[sgp]") {
 	}
 
 	WHEN("TRACK_PARENT_TASKS is 0 (off, returns self tasks only)") {
-		config.TRACK_PARENT_TASKS(0);
+		config.TRACK_PARENT_TASKS(CURRENTLONLY);
 		SGPWorld world(random, &config, LogicTasks);
 
 		emp::Ptr<SGPHost> host = emp::NewPtr<SGPHost>(&random, &world, &config);

@@ -77,7 +77,7 @@ TEST_CASE("Host Setup", "[sgp]") {
   config.SEED(2);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.000);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   config.VT_TASK_MATCH(1);
   config.HOST_ONLY_FIRST_TASK_CREDIT(1);
   config.SYM_ONLY_FIRST_TASK_CREDIT(1);
@@ -266,7 +266,7 @@ TEST_CASE("TaskMatchCheck for parents", "[sgp]") {
     config.SEED(2);
     config.MUTATION_RATE(0.0);
     config.MUTATION_SIZE(0.000);
-    config.TRACK_PARENT_TASKS(1);
+    config.TRACK_PARENT_TASKS(PARENTONLY);
     config.VT_TASK_MATCH(1);
     config.HOST_ONLY_FIRST_TASK_CREDIT(0);
     config.SYM_ONLY_FIRST_TASK_CREDIT(0);
@@ -321,7 +321,7 @@ TEST_CASE("TaskMatchCheck when HOST_ONLY_FIRST_TASK_CREDIT and SYM_ONLY_FIRST_TA
     config.SEED(2);
     config.MUTATION_RATE(0.0);
     config.MUTATION_SIZE(0.000);
-    config.TRACK_PARENT_TASKS(1);
+    config.TRACK_PARENT_TASKS(PARENTONLY);
     config.VT_TASK_MATCH(1);
     config.HOST_ONLY_FIRST_TASK_CREDIT(1);
     config.SYM_ONLY_FIRST_TASK_CREDIT(1);
@@ -467,7 +467,7 @@ TEST_CASE("SGP SymDoBirth", "[sgp]") {
   config.SYMBIONT_TYPE(PARASITE);
   config.MUTATION_RATE(0.0);
   config.MUTATION_SIZE(0.000);
-  config.TRACK_PARENT_TASKS(1);
+  config.TRACK_PARENT_TASKS(PARENTONLY);
   SGPWorld world(random, &config, LogicTasks);
   world.Resize(2, 2);
 
@@ -495,7 +495,7 @@ TEST_CASE("SGP SymDoBirth", "[sgp]") {
 
   WHEN("Preferential ousting is on and the target host has a symbiont") {
     config.OUSTING(1);
-    config.PREFERENTIAL_OUSTING(2);
+    config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
     WHEN("The incoming symbiont has a better match"){
       symbiont_parent->GetCPU().state.parent_tasks_performed->Set(1);
       world.SymDoBirth(symbiont_offspring, parent_pos);
@@ -561,41 +561,41 @@ TEST_CASE("Preferential ousting", "[sgp]"){
     incoming_symbiont_parent->GetCPU().state.parent_tasks_performed->Set(6);
 
     WHEN("Preferential ousting is off"){ // sanity check that setting is toggleable
-      config.PREFERENTIAL_OUSTING(0);
+      config.PREFERENTIAL_OUSTING(OFF);
       THEN("Ousting succeeds"){
         REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == true);
       }
     }
     WHEN("Preferential ousting is on"){
       WHEN("Parental tasks are used"){
-        config.TRACK_PARENT_TASKS(1);
+        config.TRACK_PARENT_TASKS(PARENTONLY);
         world.SetupTaskProfileFun();
 
         WHEN("Same or better task match is required"){
-          config.PREFERENTIAL_OUSTING(1);
+          config.PREFERENTIAL_OUSTING(EQUALORBETTER);
           THEN("Ousting fails"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == false);
           }
         }
         WHEN("Strictly better task match is required"){
-          config.PREFERENTIAL_OUSTING(2);
+          config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
           THEN("Ousting fails"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == false);
           }
         }
       }
       WHEN("Parental tasks are not used"){
-        config.TRACK_PARENT_TASKS(0);
+        config.TRACK_PARENT_TASKS(CURRENTLONLY);
         world.SetupTaskProfileFun();
 
         WHEN("Same or better task match is required"){
-          config.PREFERENTIAL_OUSTING(1);
+          config.PREFERENTIAL_OUSTING(EQUALORBETTER);
           THEN("Ousting fails"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == false);
           }
         }
         WHEN("Strictly better task match is required"){
-          config.PREFERENTIAL_OUSTING(2);
+          config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
           THEN("Ousting fails"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == false);
           }
@@ -621,34 +621,34 @@ TEST_CASE("Preferential ousting", "[sgp]"){
 
     WHEN("Preferential ousting is on"){
       WHEN("Parental tasks are used"){
-        config.TRACK_PARENT_TASKS(1);
+        config.TRACK_PARENT_TASKS(PARENTONLY);
         world.SetupTaskProfileFun();
 
         WHEN("Same or better task match is required"){
-          config.PREFERENTIAL_OUSTING(1);
+          config.PREFERENTIAL_OUSTING(EQUALORBETTER);
           THEN("Ousting succeeds"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == true);
           }
         }
         WHEN("Strictly better task match is required"){
-          config.PREFERENTIAL_OUSTING(2);
+          config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
           THEN("Ousting fails"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == false);
           }
         }
       }
       WHEN("Parental tasks are not used"){
-        config.TRACK_PARENT_TASKS(0);
+        config.TRACK_PARENT_TASKS(CURRENTLONLY);
         world.SetupTaskProfileFun();
 
         WHEN("Same or better task match is required"){
-          config.PREFERENTIAL_OUSTING(1);
+          config.PREFERENTIAL_OUSTING(EQUALORBETTER);
           THEN("Ousting succeeds"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == true);
           }
         }
         WHEN("Strictly better task match is required"){
-          config.PREFERENTIAL_OUSTING(2);
+          config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
           THEN("Ousting fails"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == false);
           }
@@ -676,34 +676,34 @@ TEST_CASE("Preferential ousting", "[sgp]"){
     
     WHEN("Preferential ousting is on"){
       WHEN("Parental tasks are used"){
-        config.TRACK_PARENT_TASKS(1);
+        config.TRACK_PARENT_TASKS(PARENTONLY);
         world.SetupTaskProfileFun();
 
         WHEN("Same or better task match is required"){
-          config.PREFERENTIAL_OUSTING(1);
+          config.PREFERENTIAL_OUSTING(EQUALORBETTER);
           THEN("Ousting succeeds"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == true);
           }
         }
         WHEN("Strictly better task match is required"){
-          config.PREFERENTIAL_OUSTING(2);
+          config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
           THEN("Ousting succeeds"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == true);
           }
         }
       }
       WHEN("Parental tasks are not used"){
-        config.TRACK_PARENT_TASKS(0);
+        config.TRACK_PARENT_TASKS(CURRENTLONLY);
         world.SetupTaskProfileFun();
 
         WHEN("Same or better task match is required"){
-          config.PREFERENTIAL_OUSTING(1);
+          config.PREFERENTIAL_OUSTING(EQUALORBETTER);
           THEN("Ousting succeeds"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == true);
           }
         }
         WHEN("Strictly better task match is required"){
-          config.PREFERENTIAL_OUSTING(2);
+          config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
           THEN("Ousting succeeds"){
             REQUIRE(world.PreferentialOustingAllowed(world.fun_get_task_profile(incoming_symbiont_parent), host) == true);
           }
@@ -723,7 +723,7 @@ TEST_CASE("Stress parasites can reproduce for free when their host is killed in 
     config.SYM_LIMIT(2);
     config.EXTINCTION_FREQUENCY(1);
     config.PARASITE_NUM_OFFSPRING_ON_STRESS_INTERACTION(3);
-    config.TRACK_PARENT_TASKS(1);
+    config.TRACK_PARENT_TASKS(PARENTONLY);
     config.INTERACTION_MECHANISM(STRESS);
     config.SYMBIONT_TYPE(1);
 
@@ -789,7 +789,7 @@ TEST_CASE("ProcessStressEscapeeOffspring", "[sgp]") {
     config.SYM_LIMIT(2);
     config.EXTINCTION_FREQUENCY(1);
     config.PARASITE_NUM_OFFSPRING_ON_STRESS_INTERACTION(6);
-    config.TRACK_PARENT_TASKS(1);
+    config.TRACK_PARENT_TASKS(PARENTONLY);
     config.INTERACTION_MECHANISM(STRESS);
     config.SYMBIONT_TYPE(1);
     config.BASE_DEATH_CHANCE(0);
@@ -843,7 +843,7 @@ TEST_CASE("ProcessStressEscapeeOffspring", "[sgp]") {
     WHEN("Preferential ousting is on") {
       config.TASK_MATCH_FOR_SYMBIOTIC_BEHAVIOR(1); // have some survivors
       config.OUSTING(1);
-      config.PREFERENTIAL_OUSTING(2);
+      config.PREFERENTIAL_OUSTING(STRICTLYBETTER);
       config.PARASITE_DEATH_CHANCE(0.8);
 
       emp::Ptr<StressHost> host_4 = emp::NewPtr<StressHost>(&random, &world, &config);
@@ -980,7 +980,7 @@ TEST_CASE("GetNeighborHost", "[sgp]") {
   emp::Random random(13);
   SymConfigSGP config;
   config.SYM_LIMIT(1);
-  config.TRACK_PARENT_TASKS(0);
+  config.TRACK_PARENT_TASKS(CURRENTLONLY);
 
   SGPWorld world(random, &config, LogicTasks);
   world.Resize(2);
