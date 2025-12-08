@@ -14,20 +14,21 @@
 using Library = sgpl::OpLibrary<
     
 
-    sgpl::Nop<0>, 
-    sgpl::Nop<1>, 
-    sgpl::Nop<2>, 
-    sgpl::BitwiseShift, 
-    sgpl::Increment, 
-    sgpl::Decrement, 
-    sgpl::Add, 
-    sgpl::Subtract, 
-    sgpl::global::JumpIfNot, 
-    sgpl::local::JumpIfNot,
+    sgpl::Nop<>,
+    // single argument math
+    inst::ShiftLeft, inst::ShiftRight, inst::Increment, inst::Decrement,
+    // biological operations
     inst::Reproduce, 
     inst::SharedIO,
-    inst::Nand,
-    sgpl::global::Anchor 
+    inst::Steal,
+    inst::Donate, 
+    // double argument math
+    inst::Add, inst::Subtract, inst::Nand,
+    // Stack manipulation
+    inst::Push, inst::Pop, inst::SwapStack, inst::Swap,
+    // no h-search
+    inst::JumpIfNEq, inst::JumpIfLess, 
+    sgpl::global::Anchor
     >;
 
 using Spec = sgpl::Spec<Library, CPUState>;
