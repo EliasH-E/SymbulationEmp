@@ -57,6 +57,8 @@ struct CPUState {
   int task_toward_partner[CPU_BITSET_LENGTH] = { 0 };
   int task_from_partner[CPU_BITSET_LENGTH] = { 0 };
 
+  int cycles_alotted = 0;
+
   // If this organism is queued for reproduction, this stores its position in
   // the queue. When the organism dies, its queue slot will be invalidated.
   int in_progress_repro = -1;

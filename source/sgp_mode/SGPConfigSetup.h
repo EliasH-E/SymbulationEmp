@@ -37,6 +37,8 @@ EMP_EXTEND_CONFIG(SymConfigSGP, SymConfigBase,
 
   GROUP(HEALTH, "Health Settings"),
   VALUE(CPU_TRANSFER_CHANCE, double, 0.5, "What is the chance for cycles to be stolen/donated?"),
+  VALUE(CPU_TRANSFER_AMOUNT, double, 0.5, "What is the proportion of cycles to be stolen/donated?"),
+  VALUE(HEALTH_SYM_CYCLES, size_t, 0, "Number of CPU cycles that symbionts run every update?"),
 
   GROUP(HEALTH_INSTRUCTIONS, "Health Instruction Settings"),
   VALUE(DONATION_STEAL_INST, bool, 0, "1 if you want donate and steal instructions in the instruction set, 0 if not")

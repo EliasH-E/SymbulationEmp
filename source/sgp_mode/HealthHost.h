@@ -2,7 +2,7 @@
 #define HEALTHHOST_H
 
 #include "SGPHost.h"
-
+#include "SGPSymbiont.h"
 class HealthHost : public SGPHost {
     public:
 
@@ -14,6 +14,8 @@ class HealthHost : public SGPHost {
     int honorary_cycles = 0;
     int starting_updates = 1;
     emp::Ptr<Organism> last_sym = NULL; 
+
+    int sym_turn = 0;
 
     /**
      * Constructs a new SGPHost as an ancestor organism, with a blank genome that knows how to do a simple task.
@@ -94,6 +96,8 @@ class HealthHost : public SGPHost {
      * include reproduction and acquisition of resources; removing dead syms;
      * processing alive syms; Giving CPU cycles to syms; Receiving CPU cycles from syms;. 
      */
+
+    //Give sim some base cycles
     void Process(emp::WorldPosition pos) override {
         if (GetDead()) {
             // Handle the case where the host is dead
@@ -102,21 +106,21 @@ class HealthHost : public SGPHost {
             return;
         }
         
-        int host_cycle = 1;
-        int sym_cycle = 0;
-        if (HasSym()) {
+        int host_cycle = sgp_config->CYCLES_PER_UPDATE();
+        int sym_cycle = sgp_config->HEALTH_SYM_CYCLES();
+        if (HasSym() && HasMatchingSym()) {
           if(sgp_config->DONATION_STEAL_INST()){
             if(cycles_given >= 1){
               if(random->P(sgp_config->CPU_TRANSFER_CHANCE())){
-                host_cycle += sgp_config->SYNERGY();
-                sym_cycle -= 1;
+                host_cycle += sgp_config->SYNERGY() * sgp_config->HEALTH_SYM_CYCLES() * sgp_config->CPU_TRANSFER_AMOUNT();
+                sym_cycle -= sgp_config->HEALTH_SYM_CYCLES() * sgp_config->CPU_TRANSFER_AMOUNT();
                 cycles_given = 0;
               }
             }
             if(cycles_given <= -1){
               if(random->P(sgp_config->CPU_TRANSFER_CHANCE())){
-                host_cycle = 0;
-                sym_cycle += sgp_config->SYNERGY();
+                host_cycle -= sgp_config->CYCLES_PER_UPDATE() * sgp_config->CPU_TRANSFER_AMOUNT();
+                sym_cycle += sgp_config->SYNERGY() * sgp_config->CYCLES_PER_UPDATE() * sgp_config->CPU_TRANSFER_AMOUNT();
                 cycles_given = 0;
               }
             }
@@ -135,7 +139,7 @@ class HealthHost : public SGPHost {
 
             if(sym_cycle == 0 && sgp_config->DONATION_STEAL_INST()){
               if(starting_updates > 0){
-                sym_cycle += 1;
+                sym_cycle += sgp_config->HEALTH_SYM_CYCLES();
                 starting_updates -= 1;
               }
             }
@@ -151,52 +155,78 @@ class HealthHost : public SGPHost {
             if (sgp_config->SYMBIONT_TYPE() == MUTUALIST) {
               //Host with mutualist gains 50% of CPU from mutualist
               if (random->P(sgp_config->CPU_TRANSFER_CHANCE())) {
-                host_cycle = 1 + sgp_config->SYNERGY();
-                sym_cycle = 0;
-              } else {
-                host_cycle = 1;
-                sym_cycle = 1;
-              }
+                //Host gains a proportion of cycles
+                host_cycle += (sgp_config->SYNERGY() * sgp_config->HEALTH_SYM_CYCLES() * sgp_config->CPU_TRANSFER_AMOUNT());
+                
+                //Sym loses a proportion of cycles
+                sym_cycle = sgp_config->HEALTH_SYM_CYCLES() * (1-sgp_config->CPU_TRANSFER_AMOUNT());
+              } 
             }
             else if (sgp_config->SYMBIONT_TYPE() == PARASITE) {
               //Host with parasite loses 50% of CPU to parasite
               if (random->P(sgp_config->CPU_TRANSFER_CHANCE())) {
-                host_cycle = 0;
-                sym_cycle = sgp_config->SYNERGY();
-              } else {
-                host_cycle = 1;
-                sym_cycle = 0;
-              }
+                //Host loses a proportion of cycles
+                host_cycle = sgp_config->CYCLES_PER_UPDATE() * (1-sgp_config->CPU_TRANSFER_AMOUNT());
+
+                //Sym gains a proportion of cycles
+                sym_cycle += sgp_config->SYNERGY() * sgp_config->CYCLES_PER_UPDATE() * sgp_config->CPU_TRANSFER_AMOUNT();
+             
             }
           }
         }
+      }
 
         //Loops running CPU steps
-        for(int i = 0; i < host_cycle; i++){
-          GetCPU().RunCPUStep(pos, sgp_config->CYCLES_PER_UPDATE());
+        if(host_cycle > 0){
+          GetCPU().state.cycles_alotted = host_cycle;
+          GetCPU().RunCPUStep(pos, GetCPU().state.cycles_alotted);
         }
 
-        if (HasSym() && sym_cycle > 0) { // let each sym do whatever they need to do
-          for (int i = 0; i < sym_cycle; i++){
-            emp::vector<emp::Ptr<Organism>> &syms = GetSymbionts();
-            for (size_t j = 0; j < syms.size(); j++) {
-              emp::Ptr<Organism> cur_sym = syms[j];
-              if (GetDead()) {
-                return; // If previous symbiont killed host, we're done
-              }
-              // sym position should have host index as id and
-              // position in syms list + 1 as index (0 as fls index)
-              emp::WorldPosition sym_pos = emp::WorldPosition(j + 1, pos.GetIndex());
-              if (!cur_sym->GetDead()) {
-                cur_sym->Process(sym_pos);
-              }
-              if (cur_sym->GetDead()) {
-                syms.erase(syms.begin() + j); // if the symbiont dies during their
-                                              // process, remove from syms list
-                cur_sym.Delete();
-              }    
-            } 
-          } 
+        if (HasSym() && sym_cycle > 0) { 
+
+          emp::vector<emp::Ptr<Organism>> &syms = GetSymbionts();
+          
+          std::vector<int> sym_cylce_list(syms.size()); 
+          
+            
+          int cycleCount = sym_cycle;
+            
+          while (cycleCount > 0){
+            int currentIndex = sym_turn % syms.size();
+            sym_cylce_list[currentIndex] += 1;
+            cycleCount -= 1;
+            sym_turn += 1;
+          }
+          
+          
+          // let each sym do whatever they need to do
+         
+          
+          for (size_t j = 0; j < syms.size(); j++) {
+            
+            
+            emp::Ptr<Organism> cur_sym = syms[j];
+            if (GetDead()) {
+              return; // If previous symbiont killed host, we're done
+            }
+            // sym position should have host index as id and
+            // position in syms list + 1 as index (0 as fls index)
+            emp::WorldPosition sym_pos = emp::WorldPosition(j + 1, pos.GetIndex());
+            if (!cur_sym->GetDead()) {
+              assign_cycles(cur_sym, sym_cylce_list[j]);
+              cur_sym->Process(sym_pos);
+              assign_cycles(cur_sym, 0);
+              
+            }
+            if (cur_sym->GetDead()) {
+              syms.erase(syms.begin() + j); // if the symbiont dies during their
+                                            // process, remove from syms list
+              cur_sym.Delete();
+              break;
+            }    
+          
+          }
+           
         }
         GrowOlder();
     }

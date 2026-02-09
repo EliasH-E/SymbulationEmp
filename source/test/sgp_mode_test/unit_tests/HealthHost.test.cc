@@ -15,6 +15,40 @@
  * This file is dedicated to unit tests for HealthHost
  */
 
+
+TEST_CASE("Multi sym Health Host test","[multi]"){
+  emp::Random random(10);
+  SymConfigSGP config;
+  config.SEED(10);
+  config.INTERACTION_MECHANISM(HEALTH);
+
+  config.SYNERGY(1);
+  config.SYM_LIMIT(2);
+  config.CPU_TRANSFER_CHANCE(1);
+
+  SGPWorld world(random, &config, LogicTasks);
+
+  emp::Ptr<HealthHost> host = emp::NewPtr<HealthHost>(&random, &world, &config, CreateNotProgram(100));
+  config.SYMBIONT_TYPE(PARASITE);
+  config.START_MOI(1);
+
+  emp::Ptr<SGPSymbiont> parasite_symbiont1 = emp::NewPtr<SGPSymbiont> (&random, &world, &config);
+  emp::Ptr<SGPSymbiont> parasite_symbiont2 = emp::NewPtr<SGPSymbiont> (&random, &world, &config);
+
+  host->AddSymbiont(parasite_symbiont1);
+  host->AddSymbiont(parasite_symbiont2);
+  world.AddOrgAt(host, 0);
+
+  host->Process(0);
+
+  REQUIRE(parasite_symbiont1->GetAge() > parasite_symbiont2->GetAge());
+
+  host->Process(0);
+
+  REQUIRE(parasite_symbiont1->GetAge() == parasite_symbiont2->GetAge());
+
+}
+
  
 TEST_CASE("Health host with symbiont loses/gains cycle 50% of time", "[sgp][sgp-unit]") {
   GIVEN("A health host"){

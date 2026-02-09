@@ -171,8 +171,8 @@ public:
     if (GetDead()) {
       return;
     }
-    
-    cpu.RunCPUStep(pos, sgp_config->CYCLES_PER_UPDATE());
+    cpu.state.cycles_alotted = sgp_config->CYCLES_PER_UPDATE();
+    cpu.RunCPUStep(pos, cpu.state.cycles_alotted);
     
 
     if (HasSym()) { // let each sym do whatever they need to do
@@ -186,6 +186,7 @@ public:
         // position in syms list + 1 as index (0 as fls index)
         emp::WorldPosition sym_pos = emp::WorldPosition(j + 1, pos.GetIndex());
         if (!curSym->GetDead()) {
+          assign_cycles(curSym, sgp_config->HEALTH_SYM_CYCLES());
           curSym->Process(sym_pos);
         }
         if (curSym->GetDead()) {
@@ -228,6 +229,23 @@ public:
     Host::Mutate();
 
     cpu.Mutate();
+  }
+
+  void assign_cycles(emp::Ptr<Organism> sym, size_t cycles);
+
+  bool HasMatchingSym(){
+    if(!HasSym()){
+      return false;
+    }
+
+   
+    for(int i = 0; i < GetSymbionts().size(); i++){
+      emp::Ptr<Organism> curSym = GetSymbionts()[i];
+      if(my_world->TaskMatchCheck(my_world->fun_get_task_profile(curSym), my_world->fun_get_task_profile(this))){
+        return true;
+      }
+    }
+    return false;
   }
 };
 

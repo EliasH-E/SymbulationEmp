@@ -13,6 +13,7 @@
 * Purpose: To create a new baby host and reset this host's points to 0.
 */
 emp::Ptr<Organism> SGPHost::Reproduce() {
+  
   emp::Ptr<SGPHost> host_baby = Host::Reproduce().DynamicCast<SGPHost>();
   host_baby->SetReproCount(reproductions + 1);
   // This organism is reproducing, so it must have gotten off the queue
@@ -55,6 +56,11 @@ emp::Ptr<Organism> SGPHost::Reproduce() {
     }
   }
   return host_baby;
+}
+
+void SGPHost::assign_cycles(emp::Ptr<Organism> sym, size_t cycles){
+  emp::Ptr<SGPSymbiont> cast_symbiont = sym.DynamicCast<SGPSymbiont>();
+  cast_symbiont->GetCPU().state.cycles_alotted = cycles;
 }
 
 

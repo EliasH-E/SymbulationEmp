@@ -171,7 +171,7 @@ public:
       return;
     }
     
-    cpu.RunCPUStep(pos, sgp_config->CYCLES_PER_UPDATE());
+    cpu.RunCPUStep(pos, cpu.state.cycles_alotted);
     // The parts of Symbiont::Process that don't use resources or reproduction
 
     // Age the organism
