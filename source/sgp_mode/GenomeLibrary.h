@@ -13,7 +13,6 @@
 
 using Library = sgpl::OpLibrary<
     
-
     sgpl::Nop<0>, 
     sgpl::BitwiseShift, 
     sgpl::Increment, 

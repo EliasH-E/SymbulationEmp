@@ -66,7 +66,7 @@ struct CPUState {
   emp::Ptr<Organism> organism;
   emp::Ptr<SGPWorld> world;
   emp::WorldPosition location;
-
+  
   CPUState(emp::Ptr<Organism> organism, emp::Ptr<SGPWorld> world)
       : organism(organism), world(world) {}
 };

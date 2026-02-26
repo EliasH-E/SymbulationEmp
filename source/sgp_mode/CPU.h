@@ -58,7 +58,8 @@ class CPU {
 public:
   CPUState state;
 
-  sgpl::Cpu<Spec> GetCPUPointer() {
+  //Change to pointer/ref instead
+  sgpl::Cpu<Spec>& GetCPUPointer() {
     return cpu;
   }
 

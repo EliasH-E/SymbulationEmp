@@ -148,7 +148,6 @@ INST(Steal, {
    
   }
 );
-
 } // namespace inst
 
 #endif
