@@ -25,7 +25,7 @@ using Library = sgpl::OpLibrary<
     inst::SharedIO,
     inst::Nand,
     inst::Donate, inst::Steal,
-    sgpl::global::Anchor 
+    sgpl::global::Anchor, inst::IOSense 
     >;
 
 using Spec = sgpl::Spec<Library, CPUState>;

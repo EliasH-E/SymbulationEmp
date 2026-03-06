@@ -8,7 +8,7 @@ class HealthHost : public SGPHost {
     public:
 
     //Tracks whether an update needs to be given to a symbiont or received from a symbiont
-    int cycles_given = 1;
+    int cycles_given = 0;
 
     //Variables that are currently used to give symbionts some starting cycles and then give them scraps throughout
     //the rest of their updates.

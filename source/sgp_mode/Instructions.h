@@ -140,6 +140,7 @@ INST(Steal, {
       return;
     }
     emp::Ptr<Organism> host = state.organism->GetHost();
+   
     if(host->GetCyclesGiven() >= 0){
         host->CycleTransfer(-1);
         state.world->GetStealCount().AddDatum(1);
@@ -148,6 +149,13 @@ INST(Steal, {
    
   }
 );
+
+INST(IOSense, {
+  *a = 1;
+}
+);
 } // namespace inst
+
+
 
 #endif
