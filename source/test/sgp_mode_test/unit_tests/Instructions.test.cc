@@ -23,7 +23,7 @@
 #include "../../../../signalgp-lite/include/sgpl/spec/Spec.hpp"
 
 
-TEST_CASE("Test Increment", "[idk]") {
+TEST_CASE("Test Increment", "[sgp]") {
   GIVEN("A program that only does increment"){
   //Creates a program that only does Increment
   const sgpl::Program<Spec> program(R"(
@@ -64,7 +64,7 @@ TEST_CASE("Test Increment", "[idk]") {
   //Creates a Functor of the run function of the instruction using the op_code of increment
   using library_t = typename Spec::library_t;
   using Functor = typename library_t::template Operation<increment_code>;
-  WHEN("An organism runs increment on 0"){
+  WHEN("An organism runs increment on an input of 0"){
     //Runs the Functor, thus runs the increment instruction on the host
     Functor::template run<Spec>(host->GetCPU().GetCPUPointer().GetActiveCore(), program[0], program, host->GetCPU().state);
     THEN("The first item in the register is 1"){
@@ -75,7 +75,7 @@ TEST_CASE("Test Increment", "[idk]") {
 }
 
 
-TEST_CASE("Test Decrement", "[idk]") {
+TEST_CASE("Test Decrement", "[sgp]") {
   GIVEN("A program that only does Decrement"){
   //Creates a program that only does Decrement
   const sgpl::Program<Spec> program(R"(
@@ -119,7 +119,7 @@ TEST_CASE("Test Decrement", "[idk]") {
   using Functor = typename library_t::template Operation<decrement_code>;
 
   host->GetCPU().GetCPUPointer().GetActiveCore().registers[program[0].args[0]] = 99;
-  WHEN("An argument runs decrement on 99"){
+  WHEN("An Organism runs decrement on an input of 99"){
     //Runs the Functor, thus runs the Decrement instruction on the host
     Functor::template run<Spec>(host->GetCPU().GetCPUPointer().GetActiveCore(), program[0], program, host->GetCPU().state);
     THEN("The first item in the register is 99"){
@@ -130,7 +130,7 @@ TEST_CASE("Test Decrement", "[idk]") {
 }
 
 
-TEST_CASE("Test Add", "[idk]") {
+TEST_CASE("Test Add", "[sgp]") {
   GIVEN("A program that only does add"){
   //Creates a program that only does Add
   const sgpl::Program<Spec> program(R"(
@@ -188,7 +188,7 @@ TEST_CASE("Test Add", "[idk]") {
 }
 
 
-TEST_CASE("Test Subtract", "[idk]") {
+TEST_CASE("Test Subtract", "[sgp]") {
   GIVEN("A program that only does subtract"){
   //Creates a program that only does Add
   const sgpl::Program<Spec> program(R"(
@@ -245,7 +245,7 @@ TEST_CASE("Test Subtract", "[idk]") {
   }
 }
 
-TEST_CASE("Test Nand", "[idk]") {
+TEST_CASE("Test Nand", "[sgp]") {
   GIVEN("A program that only does Nand"){
     //Creates a program that only does Nand
     const sgpl::Program<Spec> program(R"(
@@ -303,7 +303,7 @@ TEST_CASE("Test Nand", "[idk]") {
   }
 }
 
-TEST_CASE("Test Steal", "[idk]") {
+TEST_CASE("Test Steal", "[sgp]") {
 
   GIVEN("A program that only does steal"){
     //Creates a program that only does Steal
@@ -362,7 +362,7 @@ TEST_CASE("Test Steal", "[idk]") {
   }
 }
 
-TEST_CASE("Test Donate", "[idk]") {
+TEST_CASE("Test Donate", "[sgp]") {
 
   GIVEN("A program that only does donate"){
     //Creates a program that only does Donate
