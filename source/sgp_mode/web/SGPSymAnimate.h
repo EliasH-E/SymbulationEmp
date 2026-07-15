@@ -79,7 +79,18 @@ private:
   emp::vector<emp::Ptr<Organism>> p;
 
 
-  int taskCompletions[9] = {0};
+  int task_completions[9] = {0};
+  std::map<std::string, int> task_name_to_int = {
+        {"NOT", 0},
+        {"NAND", 1},
+        {"OR_NOT", 2},
+        {"AND", 3},
+        {"OR", 4},
+        {"AND_NOT", 5},
+        {"NOR", 6},
+        {"XOR", 7},
+        {"EQU", 8}
+    };
 
 
 public:
@@ -114,14 +125,7 @@ public:
         }
     })json";
 
-    FILE *file = fopen("environment.json", "w");
-    if (file == NULL) {
-        printf("Error opening file inside virtual filesystem!\n");
-      
-    }
-
-    fprintf(file, "%s", json_data);
-    fclose(file);
+    
     
 
     //Make json itself and add it to file
@@ -152,7 +156,7 @@ public:
     if (am.HasUnused()) std::exit(EXIT_FAILURE);
 
     initializeWorld();
-
+    
     emp::prefab::ConfigPanel config_panel(config, true);
     //Exclude all the settings that control
     //things that don't show up in the GUI correctly
@@ -276,15 +280,15 @@ public:
     // ----------------------- Keep track of number of updates -----------------------
     buttons << "<br>";
     buttons << UI::Text("update") << "Update = " << UI::Live( [this](){ return world.GetUpdate(); } ) << "  ";
-    buttons << UI::Text("not") << "Tasks: {" << UI::Live( [this](){ return taskCompletions[0]; } ) << ",";
-    buttons << UI::Text("nand") << " " << UI::Live( [this](){ return taskCompletions[1]; } ) << ",";
-    buttons << UI::Text("orn") << " " << UI::Live( [this](){ return taskCompletions[2]; } ) << ",";
-    buttons << UI::Text("and") << " " << UI::Live( [this](){ return taskCompletions[3]; } ) << ",";
-    buttons << UI::Text("or") << " " << UI::Live( [this](){ return taskCompletions[4]; } ) << ",";
-    buttons << UI::Text("andn") << " " << UI::Live( [this](){ return taskCompletions[5]; } ) << ",";
-    buttons << UI::Text("nor") << " " << UI::Live( [this](){ return taskCompletions[6]; } ) << ",";
-    buttons << UI::Text("xor") << " " << UI::Live( [this](){ return taskCompletions[7]; } ) << ",";
-    buttons << UI::Text("equ") << " " << UI::Live( [this](){ return taskCompletions[8]; } ) << "}";
+    buttons << UI::Text("not") << "Tasks: {" << UI::Live( [this](){ return task_completions[0]; } ) << ",";
+    buttons << UI::Text("nand") << " " << UI::Live( [this](){ return task_completions[1]; } ) << ",";
+    buttons << UI::Text("orn") << " " << UI::Live( [this](){ return task_completions[2]; } ) << ",";
+    buttons << UI::Text("and") << " " << UI::Live( [this](){ return task_completions[3]; } ) << ",";
+    buttons << UI::Text("or") << " " << UI::Live( [this](){ return task_completions[4]; } ) << ",";
+    buttons << UI::Text("andn") << " " << UI::Live( [this](){ return task_completions[5]; } ) << ",";
+    buttons << UI::Text("nor") << " " << UI::Live( [this](){ return task_completions[6]; } ) << ",";
+    buttons << UI::Text("xor") << " " << UI::Live( [this](){ return task_completions[7]; } ) << ",";
+    buttons << UI::Text("equ") << " " << UI::Live( [this](){ return task_completions[8]; } ) << "}";
     buttons << "<br>";
 
     // Add a canvas for petri dish and draw the initial petri dish
@@ -313,6 +317,9 @@ public:
     world.Setup();
 
     p = world.GetPop();
+
+
+
 
   }
 
@@ -343,9 +350,10 @@ public:
   void drawPetriDish(UI::Canvas & can){
         int i = 0;
         for(int j = 0; j < 9; j++){
-          taskCompletions[j] = 0;
+          task_completions[j] = 0;
         }
         p = world.GetPop();
+        const sgpmode::tasks::LogicTaskSet& task_set = world.GetTaskEnv().GetTaskSet();
         //bool temp_passed = true;
         for (int x = 0; x < config.WORLD_WIDTH(); x++){
             for (int y = 0; y < config.WORLD_HEIGHT(); y++){
@@ -367,8 +375,10 @@ public:
                 for(int task_id = 8; task_id >= 0; task_id--){
                   if(host.GetHardware().GetCPUState().GetTaskPerformed(task_id)){
                     
-                    color_host = matchColor(task_id);
-                    taskCompletions[task_id] += 1;
+                    std::string task_name = task_set.GetName(task_id);
+                    int task_color_id = task_name_to_int[task_name];
+                    color_host = matchColor(task_color_id);
+                    task_completions[task_color_id] += 1;
                     break;
                   }
                 }
@@ -377,8 +387,10 @@ public:
                   for(int task_id = 8; task_id >= 0; task_id--){
                     if(host.GetHardware().GetCPUState().GetParentTaskPerformed(task_id)){
                       
-                      color_host = matchColor(task_id);
-                      taskCompletions[task_id] += 1;
+                      std::string task_name = task_set.GetName(task_id);
+                      int task_color_id = task_name_to_int[task_name];
+                      color_host = matchColor(task_color_id);
+                      task_completions[task_color_id] += 1;
                       break;
                     }
                   }
@@ -400,8 +412,11 @@ public:
                   std::string color_sym = "#EFFDF0";
                   for(int task_id = 8; task_id >= 0; task_id--){
                     if(sym.GetHardware().GetCPUState().GetTaskPerformed(task_id)){
-                      color_sym = matchColor(task_id);
-                      taskCompletions[task_id] += 1;
+
+                      std::string task_name = task_set.GetName(task_id);
+                      int task_color_id = task_name_to_int[task_name];
+                      color_sym = matchColor(task_color_id);
+                      task_completions[task_color_id] += 1;
                       break;
                     }
                   }
@@ -410,8 +425,11 @@ public:
                   for(int task_id = 8; task_id >= 0; task_id--){
                     if(sym.GetHardware().GetCPUState().GetParentTaskPerformed(task_id)){
                       
-                      color_sym = matchColor(task_id);
-                      taskCompletions[task_id] += 1;
+
+                      std::string task_name = task_set.GetName(task_id);
+                      int task_color_id = task_name_to_int[task_name];
+                      color_sym = matchColor(task_color_id);
+                      task_completions[task_color_id] += 1;
                       break;
                     }
                   }
