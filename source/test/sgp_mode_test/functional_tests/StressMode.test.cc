@@ -138,7 +138,7 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
   emp::Random random(config.SEED());
   world_t world(random, &config);
 
-  size_t no_mut_NAND_rate = 40000;
+  size_t no_mut_NAND_rate = 60000;
   size_t run_updates = 1500;
 
   WHEN("Mutation size is 0") {
