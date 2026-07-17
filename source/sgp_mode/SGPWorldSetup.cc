@@ -406,6 +406,12 @@ void SGPWorld::SetupHosts(long unsigned int* POP_SIZE) {
         break;
     }
 
+    if (task_env.IsHostTask(nand_task_id)) {
+        new_host->GetHardware().GetCPUState().SetParentTaskPerformed(nand_task_id, true);
+        new_host->GetHardware().GetCPUState().SetParentFirstTaskPerformed(nand_task_id, true);
+        new_host->GetHardware().GetCPUState().MarkTaskPerformed(nand_task_id);
+      }
+
     // NOTE - what about other Start MOI values?
     // - these endosymbionts have empty programs?
     if (sgp_config.START_MOI() == 1) {
