@@ -521,9 +521,47 @@ emp::DataFile& SGPWorld::SetupCurrentUpdateInfoFile(const std::string& filepath)
     "Entropy of distinct task sets represented among all sym current tasks performed."
   );
 
-  file.PrintHeaderKeys();
-  return file;
-}
+      file.AddFun<std::string>(
+      [this]() -> std::string {
+        const auto& task_set_counts = current_update_data.host_current_tasks_performed;
+        std::stringstream outputs_string;
+        outputs_string << "{";
+        bool first = true;
+        for (const auto& [bits, count] : task_set_counts) {
+          if (!first) outputs_string << " ";
+          outputs_string << bits.ToString() << ":" << count;
+          first = false;
+        }
+        outputs_string << "}";
+        return outputs_string.str();
+      },
+      "host_task_combination",
+      "Task combinations (bitstrings) performed by hosts."
+    );
+
+    file.AddFun<std::string>(
+      [this]() -> std::string {
+        const auto& task_set_counts = current_update_data.sym_current_tasks_performed;
+        std::stringstream outputs_string;
+        outputs_string << "{";
+        bool first = true;
+        for (const auto& [bits, count] : task_set_counts) {
+          if (!first) outputs_string << " ";
+          outputs_string << bits.ToString() << ":" << count;
+          first = false;
+        }
+        outputs_string << "}";
+        return outputs_string.str();
+      },
+      "sym_task_combination",
+      "Task combinations (bitstrings) performed by symbionts."
+    );
+
+  
+
+    file.PrintHeaderKeys();
+    return file;
+  }
 
 // NOTE - This isn't setup to handle free-living symbionts!
 void SGPWorld::CollectCurrentUpdateData() {
