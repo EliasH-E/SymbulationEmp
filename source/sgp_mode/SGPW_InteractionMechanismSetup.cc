@@ -95,11 +95,21 @@ namespace sgpmode {
             sym_donate = (size_t)(((double)interact) * (donate_prop * sym_cycles)/host.GetCountofMatchingSymsToInteractWith());
           }
           emp_assert(sym_donate >= 0);
-          sym_state.LoseCPUCycles(emp::Min(sym_donate, sym_state.GetCPUCyclesToExec()));
-          // Adjust host's cpu cycles
-          host.GetHardware().GetCPUState().GainCPUCycles(
-            sgp_config.MUTUALIST_CYCLE_DONATE_MULTIPLIER() * sym_donate
-          );
+
+          if(sgp_config.LAG_TIME() > 0){
+            size_t host_gain_amount = sgp_config.MUTUALIST_CYCLE_DONATE_MULTIPLIER() * sym_donate;
+            size_t sym_lose_amount = emp::Min(sym_donate, sym_state.GetCPUCyclesToExec());
+            sgp_host_t::InteractionEvent new_interaction_event = {host_gain_amount,sym_lose_amount,GetUpdate()};
+            host.interaction_event_queue.push_back(new_interaction_event);
+
+          }
+          else{
+            sym_state.LoseCPUCycles(emp::Min(sym_donate, sym_state.GetCPUCyclesToExec()));
+            // Adjust host's cpu cycles
+            host.GetHardware().GetCPUState().GainCPUCycles(
+              sgp_config.MUTUALIST_CYCLE_DONATE_MULTIPLIER() * sym_donate
+            );
+          }
         }
       );
     } else if (GetHealthSymType() == health_sym_mode_t::PARASITE) {
