@@ -70,6 +70,14 @@ protected:
 
 public:
 
+  struct InteractionEvent {
+        double host_magnitude=0;
+        double sym_magnitude=0;
+        int update_initialized =0;
+    };
+
+
+    std::deque<InteractionEvent> interaction_event_queue;
   /**
    * Constructs a new SGPHost as an ancestor organism, with either a random
    * genome or a blank genome that knows how to do a simple task depending on
@@ -245,6 +253,69 @@ public:
     return result;
   }
 
+
+  void ProcessInteractionQueue(size_t current_update){
+    if(interaction_event_queue.size() == 0){
+      return;
+    }
+    InteractionEvent current_event = interaction_event_queue[0];
+    while(interaction_event_queue.size() > 0 && current_update == sgp_config->LAG_TIME() + current_event.update_initialized){
+      if(sgp_config->ENABLE_NUTRIENT()){
+        double point_diff_host = current_event.host_magnitude;
+        if(current_event.host_magnitude < 0){
+          point_diff_host = emp::Min(GetPoints(),current_event.host_magnitude);
+        }
+        AddPoints(point_diff_host);
+        emp::vector<emp::Ptr<Organism>>& syms = GetSymbionts();
+        for (size_t endosym_i = 0; endosym_i < syms.size(); ++endosym_i) {
+          double point_diff_sym = current_event.sym_magnitude;
+          if(current_event.sym_magnitude < 0){
+            point_diff_sym = emp::Min( syms[endosym_i]->GetPoints(),current_event.host_magnitude);
+          }
+          syms[endosym_i]->AddPoints(point_diff_sym);
+
+        }
+      }
+
+      if(sgp_config->ENABLE_HEALTH()){
+        
+
+        if(current_event.host_magnitude < 0){
+          size_t lost_cycles = static_cast<size_t>(current_event.host_magnitude); 
+          GetHardware().GetCPUState().LoseCPUCycles(emp::Min(lost_cycles, GetHardware().GetCPUState().GetCPUCyclesToExec()));
+          
+          emp::vector<emp::Ptr<Organism>>& syms = GetSymbionts();
+          size_t gained_cycles = static_cast<size_t>(current_event.sym_magnitude);
+          for (size_t endosym_i = 0; endosym_i < syms.size(); ++endosym_i) {
+            emp::Ptr<sgp_sym_t> cur_symbiont = static_cast<sgp_sym_t*>(syms[endosym_i].Raw());
+            auto& sym_state = cur_symbiont->GetHardware().GetCPUState();
+            sym_state.GainCPUCycles(gained_cycles);
+          }
+        
+        }
+        else{
+          size_t gained_cycles = static_cast<size_t>(current_event.host_magnitude); 
+          GetHardware().GetCPUState().GainCPUCycles(gained_cycles);
+          
+          emp::vector<emp::Ptr<Organism>>& syms = GetSymbionts();
+          size_t lost_cycles = static_cast<size_t>(current_event.sym_magnitude);
+          for (size_t endosym_i = 0; endosym_i < syms.size(); ++endosym_i) {
+            emp::Ptr<sgp_sym_t> cur_symbiont = static_cast<sgp_sym_t*>(syms[endosym_i].Raw());
+            auto& sym_state = cur_symbiont->GetHardware().GetCPUState();
+            sym_state.LoseCPUCycles(emp::Min(lost_cycles, sym_state.GetCPUCyclesToExec()));
+          }
+        }
+
+        
+        
+      }
+
+      interaction_event_queue.pop_front();
+      if(interaction_event_queue.size() > 0){
+        current_event = interaction_event_queue[0];
+      }
+    }
+  }
   /**
    * Input: The location of the host.
    *
@@ -269,6 +340,8 @@ public:
     // Trigger signal to all endosymbionts that host is about to process
     //   Gives endosymbionts chance to interact with host before it processes.
     //   E.g., symbiont could steal / donate cpu cycles, resources, etc.
+
+    
 
     UpdateSymMatchCount();
 
@@ -301,6 +374,8 @@ public:
     if (GetDead()) {
       return;
     }
+    
+    ProcessInteractionQueue(my_world->GetUpdate());
 
     // NOTE - Do we want to drain cpu cycles here (i.e., get cashed in for execution?)
     const size_t cycles_to_exec = GetHardware().GetCPUState().ExtractCPUCycles();
